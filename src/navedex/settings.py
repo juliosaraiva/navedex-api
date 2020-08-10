@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
+import datetime
 from pathlib import Path
 from decouple import config, Csv
 
@@ -46,6 +46,7 @@ THIRD_PART_APPS = [
 
 PROJECT_APPS = [
     'navedex.core',
+    'navedex.navers',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PART_APPS + PROJECT_APPS
@@ -137,4 +138,9 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=10),
+    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=1),
 }

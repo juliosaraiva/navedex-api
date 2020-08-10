@@ -19,4 +19,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('navedex.core.urls')),
+    path('api/navers/', include('navedex.navers.urls')),
 ]

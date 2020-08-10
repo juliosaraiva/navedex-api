@@ -32,3 +32,13 @@ class UserModelTest(TestCase):
         """Test creating user with no email raises error"""
         with self.assertRaises(ValueError):
             get_user_model().objects.create_user(None, 'test123')
+
+    def test_user_created_has_token(self):
+        email = 'atendimento@navedex.com.br'
+        password = 'test123'
+        user = get_user_model().objects.create_user(
+            email=email,
+            password=password
+        )
+        token = user.token()
+        self.assertTrue(token)

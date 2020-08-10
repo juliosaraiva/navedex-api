@@ -15,6 +15,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ('id', 'email', 'password')
 
     def validate(self, attrs):
+        email = attrs.get("email", None)
+        check_user = get_user_model().objects.filter(email=email).exists()
+        if check_user:
+            raise serializers.ValidationError("Email Already Exists")
         return attrs
 
     def create(self, validate_data):
