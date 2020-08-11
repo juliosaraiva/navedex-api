@@ -47,6 +47,7 @@ THIRD_PART_APPS = [
 PROJECT_APPS = [
     'navedex.core',
     'navedex.navers',
+    'navedex.projects',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PART_APPS + PROJECT_APPS

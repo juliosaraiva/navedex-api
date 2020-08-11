@@ -20,4 +20,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('navedex.core.urls')),
     path('api/navers/', include('navedex.navers.urls')),
+    path('api/projects/', include('navedex.projects.urls')),
 ]
