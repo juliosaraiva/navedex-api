@@ -11,8 +11,11 @@ from navedex.projects.serializers import (
     ProjectSerializer,
 )
 
+from navedex.navers.models import Naver
 
-PROJECT_URL = reverse('project:index')
+
+PROJECT_URL = reverse('projects:index')
+TOKEN_URL = reverse('core:login')
 
 
 def sample_project(owner, **params):
@@ -46,7 +49,7 @@ class PrivateProjectsApiTest(TestCase):
             email='contato@navedex.com.br',
             password='supersenha'
         )
-        self.login = self.client.post(PROJECT_URL, payload)
+        self.login = self.client.post(TOKEN_URL, payload)
         token = ast.literal_eval(self.login.data['token'])
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token["access"]}')
 
@@ -68,8 +71,8 @@ class PrivateProjectsApiTest(TestCase):
             'other@navedex.com.br',
             '12345678'
         )
-        sample_naver(owner=owner2)
-        sample_naver(owner=self.owner)
+        sample_project(owner=owner2)
+        sample_project(owner=self.owner)
 
         res = self.client.get(PROJECT_URL)
 
@@ -79,3 +82,55 @@ class PrivateProjectsApiTest(TestCase):
         self.assertTrue(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data, serializer.data)
+
+    def test_creating_project_sucessful(self):
+        """Test creating a new project successfully"""
+        payload = dict(
+            name="Web Site Prototype"
+        )
+        self.client.post(PROJECT_URL, payload)
+
+        exists = Project.objects.filter(
+            owner=self.owner, name=payload['name']).exists()
+
+        self.assertTrue(exists)
+
+    def test_create_project_invalid(self):
+        payload = {"name": ""}
+        res = self.client.post(PROJECT_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_retrieve_project_by_name(self):
+        """Test filtering project by name"""
+        p1 = {'name': 'new Web Site Prototype'}
+        p2 = {'name': 'New Logo'}
+
+        project1 = sample_project(owner=self.owner, **p1)
+        project2 = sample_project(owner=self.owner, **p2)
+
+        res = self.client.get(PROJECT_URL, {'name': p1['name']})
+
+        serializer1 = ProjectSerializer(project1)
+        serializer2 = ProjectSerializer(project2)
+
+        self.assertIn(serializer1.data, res.data)
+        self.assertNotIn(serializer2.data, res.data)
+
+    def test_create_project_with_naver(self):
+        """Test that can add naver to project"""
+        naver_dict = {'name': 'Naver 1', 'birthdate': '1991-01-01',
+                      'admission_date': '2020-08-10', 'job_role': 'Tech Leader'}
+        naver = Naver.objects.create(owner=self.owner, **naver_dict)
+
+        project = Project.objects.create(
+            owner=self.owner, name="New WebSite Prototype"
+        )
+        project.navers.add(naver)
+
+        res = self.client.get(PROJECT_URL, args=[project.id])
+
+        serializer = ProjectSerializer(project)
+
+        self.assertIn(serializer.data, res.data)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
