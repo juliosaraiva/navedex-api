@@ -1,17 +1,21 @@
-from rest_framework import permissions
-from rest_framework.generics import (
-    ListCreateAPIView,
-    RetrieveUpdateDestroyAPIView
-)
+from rest_framework import viewsets, permissions
 
 from .models import Naver
 from navedex.navers import serializers
 
 
-class NaverAPIView(ListCreateAPIView):
+class NaverViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.NaverSerializer
     queryset = Naver.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return serializers.NaverPostSerializer
+        if self.action == 'retrieve':
+            return serializers.NaverDetailSerializer
+
+        return self.serializer_class
 
     def perform_create(self, serializer):
         return serializer.save(owner=self.request.user)
@@ -31,13 +35,3 @@ class NaverAPIView(ListCreateAPIView):
             queryset = queryset.filter(job_role__exact=job_role)
 
         return queryset.filter(owner=self.request.user)
-
-
-class NaverDetailAPIView(RetrieveUpdateDestroyAPIView):
-    serializer_class = serializers.NaverDetailSerializer
-    permission_class = (permissions.IsAuthenticated,)
-    queryset = Naver.objects.all()
-    lookup_field = 'id'
-
-    def get_queryset(self):
-        return self.queryset.filter(owner=self.request.user)

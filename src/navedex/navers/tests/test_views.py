@@ -7,12 +7,19 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from navedex.navers.models import Naver
-from navedex.navers.serializers import NaverSerializer
+from navedex.navers.serializers import (
+    NaverSerializer,
+    NaverDetailSerializer
+)
 
 from navedex.projects.models import Project
 
 TOKEN_URL = reverse('core:login')
-NAVERS_URL = reverse('navers:index')
+NAVERS_URL = reverse('navers:naver-list')
+
+
+def detail_url(naver_id):
+    return reverse('navers:naver-detail', args=[naver_id])
 
 
 def sample_naver(owner, **params):
@@ -166,18 +173,20 @@ class PrivateNaverAPITest(TestCase):
         """Test that can add project to naver"""
         project = Project.objects.create(
             name="New Website Prototype",
-            owner=self.owner)
+            owner=self.owner
+        )
 
-        naver_dict = {'name': 'Naver 2', 'birthdate': '1992-02-02',
-                      'admission_date': '2020-09-11', 'job_role': 'Designer'}
-
+        naver_dict = dict(
+            name='Naver 2',
+            birthdate='1992-02-02',
+            admission_date='2020-09-11',
+            job_role='Designer',
+        )
         naver = Naver.objects.create(owner=self.owner, **naver_dict)
+        naver.projects.add(project.id)
 
-        naver.projects.add(project)
+        url = detail_url(naver.id)
+        res = self.client.get(url)
+        serializer = NaverDetailSerializer(naver)
 
-        res = self.client.get(NAVERS_URL, args=[naver.id])
-
-        serializer = NaverSerializer(naver)
-
-        self.assertIn(serializer.data, res.data)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(serializer.data, res.data)

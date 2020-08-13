@@ -12,6 +12,18 @@ class ProjectSerializer(serializers.ModelSerializer):
         read_only_fields = ('id',)
 
 
+class ProjectPostSerializer(serializers.ModelSerializer):
+    navers = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Naver.objects.all()
+    )
+
+    class Meta:
+        model = Project
+        fields = ('id', 'name', 'navers')
+        read_only_fields = ('id',)
+
+
 class ProjectDetailSerializer(serializers.ModelSerializer):
     navers = serializers.PrimaryKeyRelatedField(
         many=True,

@@ -75,10 +75,3 @@ $ pipenv run python manage.py runserver
 Gostei muito de ter atuado neste projeto. Achei o desafio interessante e sem dúvidas aprendi muita coisa legal durante este período.
 
 Na parte de testes, eu acho que cobri uma boa parte de testes dos pre-requisitos da aplicação, porém acho que daria pra fazer muito mais. Pela questão do tempo não consegui. Mas consegui cobrir a parte de testes para garantir que o usuário faça CRUD nas rotas de navers e projects somente se houver autenticação, caso não esteja recebe status 401. Também consegui cobrir testes para garantir que um usuário não pode remover, atualizar e listar os navers e projetos e outro usuário.
-
-# Dificuldades
-
-A dificuldade que encontrei está relacionada com o store, ao tentar armazenar um naver com um projeto, o naver era criado porém, sem o projeto, mas ao atualizar o naver para adicionar o projeto funciona tranquilamente, sendo uma limitação do store. Mas eu identifiquei o que eu teria que fazer, porém não consegui disponibilidade para atuar nessa parte. Mas basicamente o que eu precisaria fazer é:
-
-1. Criar um Serializar para o Post na app navers que implementa o projects.
-2. Não estou usando as rotas do DRF, neste caso, teria que alterar para usar as rotas do DRF, pois ele implementa recursos que facilita qual serializer_class chamar de acordo com o self.action no metodo get_serializer_class da view.

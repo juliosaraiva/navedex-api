@@ -1,9 +1,13 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
 from navedex.projects import views
+
+router = DefaultRouter()
+router.register('', views.ProjectAPIView)
 
 app_name = 'projects'
 
 urlpatterns = [
-    path('', views.ProjectAPIView.as_view(), name='index'),
-    path('<int:id>/', views.ProjectDetailAPIView.as_view(), name='detail')
+    path('', include(router.urls))
 ]

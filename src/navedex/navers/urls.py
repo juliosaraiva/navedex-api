@@ -1,9 +1,14 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
 from navedex.navers import views
+
+router = DefaultRouter()
+router.register('', views.NaverViewSet)
+
 
 app_name = 'navers'
 
 urlpatterns = [
-    path('', views.NaverAPIView.as_view(), name='index'),
-    path('<int:id>/', views.NaverDetailAPIView.as_view(), name='detail')
+    path('', include(router.urls)),
 ]

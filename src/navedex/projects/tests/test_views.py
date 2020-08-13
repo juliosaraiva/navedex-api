@@ -9,13 +9,19 @@ from rest_framework.test import APIClient
 from navedex.projects.models import Project
 from navedex.projects.serializers import (
     ProjectSerializer,
+    ProjectPostSerializer,
+    ProjectDetailSerializer
 )
 
 from navedex.navers.models import Naver
 
 
-PROJECT_URL = reverse('projects:index')
+PROJECT_URL = reverse('projects:project-list')
 TOKEN_URL = reverse('core:login')
+
+
+def detail_url(project_id):
+    return reverse('projects:project-detail', args=[project_id])
 
 
 def sample_project(owner, **params):
@@ -117,7 +123,7 @@ class PrivateProjectsApiTest(TestCase):
         self.assertIn(serializer1.data, res.data)
         self.assertNotIn(serializer2.data, res.data)
 
-    def test_create_project_with_naver(self):
+    def test_view_project_detail(self):
         """Test that can add naver to project"""
         naver_dict = {'name': 'Naver 1', 'birthdate': '1991-01-01',
                       'admission_date': '2020-08-10', 'job_role': 'Tech Leader'}
@@ -128,9 +134,24 @@ class PrivateProjectsApiTest(TestCase):
         )
         project.navers.add(naver)
 
-        res = self.client.get(PROJECT_URL, args=[project.id])
+        url = detail_url(project.id)
+        res = self.client.get(url, args=[project.id])
+        serializer = ProjectDetailSerializer(project)
 
-        serializer = ProjectSerializer(project)
+        self.assertEqual(serializer.data, res.data)
 
-        self.assertIn(serializer.data, res.data)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
+    def test_create_project_with_naver(self):
+        """Test that can create a project with naver"""
+        naver_dict = {'name': 'Naver 1', 'birthdate': '1991-01-01',
+                      'admission_date': '2020-08-10', 'job_role': 'Tech Leader'}
+        naver = Naver.objects.create(owner=self.owner, **naver_dict)
+        payload = {'name': 'Website Prototype', 'navers': [naver.id]}
+
+        res = self.client.post(PROJECT_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        project = Project.objects.get(id=res.data['id'])
+        serializer = ProjectPostSerializer(project)
+
+        self.assertEqual(serializer.data, res.data)
