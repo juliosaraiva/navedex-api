@@ -3,7 +3,14 @@ from rest_framework import serializers
 from .models import Project
 
 from navedex.navers.models import Naver
-from navedex.navers.serializers import NaverSerializer
+
+
+class NaverDetail(serializers.ModelSerializer):
+    class Meta:
+        model = Naver
+        fields = ('id', 'name', 'birthdate',
+                  'admission_date', 'job_role')
+        read_only_fields = ('id',)
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -13,10 +20,11 @@ class ProjectSerializer(serializers.ModelSerializer):
         read_only_fields = ('id',)
 
 
-class ProjectPostSerializer(serializers.ModelSerializer):
+class ProjectCreateSerializer(serializers.ModelSerializer):
     navers = serializers.PrimaryKeyRelatedField(
         many=True,
-        queryset=Naver.objects.all()
+        queryset=Naver.objects.all(),
+        required=False
     )
 
     class Meta:
@@ -24,11 +32,18 @@ class ProjectPostSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'navers')
         read_only_fields = ('id',)
 
+    def create(self, validate_data):
+        return Project.objects.create(**validate_data)
+
 
 class ProjectDetailSerializer(serializers.ModelSerializer):
-    navers = NaverSerializer(many=True, read_only=True)
+
+    navers = NaverDetail(many=True, read_only=True)
 
     class Meta:
         model = Project
         fields = ('id', 'name', 'navers')
         read_only_fields = ('id',)
+
+    def to_representation(self, instance):
+        return super().to_representation(instance)

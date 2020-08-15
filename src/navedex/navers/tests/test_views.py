@@ -1,4 +1,3 @@
-import ast
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -61,7 +60,7 @@ class PrivateNaverAPITest(TestCase):
             password='supersenha'
         )
         self.login = self.client.post(TOKEN_URL, payload)
-        token = ast.literal_eval(self.login.data["token"])
+        token = self.login.data["access_token"]
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token["access"]}')
 
     def test_retrieve_navers(self):

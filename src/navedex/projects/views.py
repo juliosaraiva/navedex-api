@@ -1,23 +1,19 @@
 from rest_framework import viewsets, permissions
 
 from .models import Project
-from .serializers import (
-    ProjectSerializer,
-    ProjectPostSerializer,
-    ProjectDetailSerializer
-)
+from navedex.projects import serializers
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
-    serializer_class = ProjectSerializer
+    serializer_class = serializers.ProjectSerializer
     queryset = Project.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_serializer_class(self):
         if self.action == 'create':
-            return ProjectPostSerializer
+            return serializers.ProjectCreateSerializer
         if self.action == 'retrieve':
-            return ProjectDetailSerializer
+            return serializers.ProjectDetailSerializer
 
         return self.serializer_class
 
