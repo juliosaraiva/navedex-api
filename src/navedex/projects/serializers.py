@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .models import Project
 
 from navedex.navers.models import Naver
+from navedex.navers.serializers import NaverSerializer
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -25,10 +26,7 @@ class ProjectPostSerializer(serializers.ModelSerializer):
 
 
 class ProjectDetailSerializer(serializers.ModelSerializer):
-    navers = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=Naver.objects.all()
-    )
+    navers = NaverSerializer(many=True, read_only=True)
 
     class Meta:
         model = Project

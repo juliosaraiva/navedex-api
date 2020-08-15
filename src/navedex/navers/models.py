@@ -11,7 +11,7 @@ class Naver(models.Model):
     birthdate = models.DateField()
     admission_date = models.DateField()
     job_role = models.CharField(max_length=255)
-    projects = models.ManyToManyField('projects.Project')
+    projects = models.ManyToManyField('projects.Project', related_name="navers", blank=True)
 
     def __str__(self):
         return self.name

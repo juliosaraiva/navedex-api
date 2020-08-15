@@ -1,3 +1,5 @@
+import ast
+
 from django.contrib.auth import get_user_model, authenticate
 from django.utils.translation import ugettext_lazy as _
 
@@ -32,11 +34,12 @@ class LoginSerializer(serializers.ModelSerializer):
         trim_whitespace=False,
         write_only=True
     )
-    token = serializers.CharField(read_only=True)
+    access_token = serializers.CharField(read_only=True)
+    refresh_token = serializers.CharField(read_only=True)
 
     class Meta:
         model = get_user_model()
-        fields = ('email', 'password', 'token')
+        fields = ('email', 'password', 'access_token', 'refresh_token')
 
     def validate(self, attrs):
         email = attrs.get('email', None)
@@ -58,7 +61,10 @@ class LoginSerializer(serializers.ModelSerializer):
             msg = _("Unable to authenticate with provided credentials")
             raise serializers.ValidationError(msg, code='authentication')
 
+        token = ast.literal_eval(user.token())
+
         return {
             "email": user.email,
-            "token": user.token
+            "access_token": token["access"],
+            "refresh_token": token["refresh"]
         }

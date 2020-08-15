@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from navedex.projects import views
 
 router = DefaultRouter()
-router.register('', views.ProjectAPIView)
+router.register('', views.ProjectViewSet)
 
 app_name = 'projects'
 

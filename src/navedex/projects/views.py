@@ -8,7 +8,7 @@ from .serializers import (
 )
 
 
-class ProjectAPIView(viewsets.ModelViewSet):
+class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
     queryset = Project.objects.all()
     permission_classes = (permissions.IsAuthenticated,)

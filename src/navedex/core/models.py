@@ -1,3 +1,4 @@
+import json
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -45,7 +46,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def token(self):
         refresh = RefreshToken.for_user(self)
-        return {
+        return json.dumps({
             'refresh': str(refresh),
             'access': str(refresh.access_token)
-        }
+        })

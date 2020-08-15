@@ -2,12 +2,14 @@ from rest_framework import viewsets, permissions
 
 from .models import Naver
 from navedex.navers import serializers
+from navedex.navers import permissions as perm
 
 
 class NaverViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.NaverSerializer
     queryset = Naver.objects.all()
-    permission_classes = (permissions.IsAuthenticated,)
+
+    permission_classes = (permissions.IsAuthenticated, perm.IsOwner)
 
     def get_serializer_class(self):
         if self.action == 'create':
