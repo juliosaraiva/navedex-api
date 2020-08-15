@@ -13,6 +13,7 @@ django = "*"
 python-decouple = "*"
 djangorestframework = "*"
 djangorestframework-simplejwt = "*"
+psycopg2 = "*"
 
 [requires]
 python_version = "3.8"
