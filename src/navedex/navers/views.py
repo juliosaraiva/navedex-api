@@ -16,6 +16,8 @@ class NaverViewSet(viewsets.ModelViewSet):
             return serializers.NaverCreateSerializer
         if self.action == 'retrieve':
             return serializers.NaverDetailSerializer
+        if self.action == 'partial_update':
+            return serializers.NaverCreateSerializer
 
         return self.serializer_class
 

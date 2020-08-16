@@ -8,7 +8,7 @@ from rest_framework.test import APIClient
 from navedex.projects.models import Project
 from navedex.projects.serializers import (
     ProjectSerializer,
-    ProjectPostSerializer,
+    ProjectCreateSerializer,
     ProjectDetailSerializer
 )
 
@@ -56,7 +56,7 @@ class PrivateProjectsApiTest(TestCase):
         )
         self.login = self.client.post(TOKEN_URL, payload)
         token = self.login.data['access_token']
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token["access"]}')
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
     def test_retrieve_projects(self):
         """Test that user logged successful"""
@@ -96,7 +96,8 @@ class PrivateProjectsApiTest(TestCase):
         self.client.post(PROJECT_URL, payload)
 
         exists = Project.objects.filter(
-            owner=self.owner, name=payload['name']).exists()
+            owner=self.owner, name=payload['name']
+        ).exists()
 
         self.assertTrue(exists)
 
@@ -151,6 +152,6 @@ class PrivateProjectsApiTest(TestCase):
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
         project = Project.objects.get(id=res.data['id'])
-        serializer = ProjectPostSerializer(project)
+        serializer = ProjectCreateSerializer(project)
 
         self.assertEqual(serializer.data, res.data)

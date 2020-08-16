@@ -8,6 +8,7 @@ from rest_framework.test import APIClient
 from navedex.navers.models import Naver
 from navedex.navers.serializers import (
     NaverSerializer,
+    NaverCreateSerializer,
     NaverDetailSerializer
 )
 
@@ -61,7 +62,7 @@ class PrivateNaverAPITest(TestCase):
         )
         self.login = self.client.post(TOKEN_URL, payload)
         token = self.login.data["access_token"]
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token["access"]}')
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
     def test_retrieve_navers(self):
         """Test that is authenticated and authorized"""
@@ -175,17 +176,60 @@ class PrivateNaverAPITest(TestCase):
             owner=self.owner
         )
 
-        naver_dict = dict(
+        payload = dict(
             name='Naver 2',
             birthdate='1992-02-02',
             admission_date='2020-09-11',
             job_role='Designer',
+            projects=[project.id]
         )
-        naver = Naver.objects.create(owner=self.owner, **naver_dict)
-        naver.projects.add(project.id)
+        res = self.client.post(NAVERS_URL, payload)
 
-        url = detail_url(naver.id)
-        res = self.client.get(url)
-        serializer = NaverDetailSerializer(naver)
+        naver = Naver.objects.get(id=res.data["id"])
+        serializer = NaverCreateSerializer(naver)
 
         self.assertEqual(serializer.data, res.data)
+
+    def test_remove_naver_successful(self):
+        """Test that the owner can remove a naver successfully"""
+        n1 = dict(
+            name='Naver 1',
+            birthdate='1992-02-02',
+            admission_date='2020-09-11',
+            job_role='Designer',
+        )
+        naver = sample_naver(owner=self.owner, **n1)
+
+        url = detail_url(naver.id)
+        res = self.client.delete(url)
+
+        check = Naver.objects.filter(id=naver.id).exists()
+
+        self.assertFalse(check)
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_partial_update_naver(self):
+        """Test updating a naver with a PATCH method"""
+        n1 = dict(
+            name='Naver 1',
+            birthdate='1992-02-02',
+            admission_date='2020-09-11',
+            job_role='Designer',
+        )
+        naver = sample_naver(owner=self.owner, **n1)
+        project = Project.objects.create(owner=self.owner, name="Develop a New API")
+
+        payload = dict(
+            job_role="Backend Developer",
+            projects=[project.id]
+        )
+
+        url = detail_url(naver.id)
+        self.client.patch(url, payload)
+
+        naver.refresh_from_db()
+
+        self.assertEqual(naver.job_role, payload['job_role'])
+        projects = naver.projects.all()
+        self.assertEqual(len(projects), 1)
+        self.assertIn(project, projects)

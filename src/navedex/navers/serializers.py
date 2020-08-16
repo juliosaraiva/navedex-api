@@ -29,13 +29,10 @@ class NaverCreateSerializer(serializers.ModelSerializer):
                   'admission_date', 'job_role', 'projects')
         read_only_fields = ('id',)
 
-    def create(self, validate_data):
-        return Naver.objects.create(**validate_data)
-
 
 class NaverDetailSerializer(serializers.ModelSerializer):
     """Show details about Naver"""
-    projects = ProjectSerializer(many=True, read_only=True)
+    projects = ProjectSerializer(many=True, read_only=True, required=False)
 
     class Meta:
         model = Naver

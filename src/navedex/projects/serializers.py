@@ -32,13 +32,10 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'navers')
         read_only_fields = ('id',)
 
-    def create(self, validate_data):
-        return Project.objects.create(**validate_data)
-
 
 class ProjectDetailSerializer(serializers.ModelSerializer):
 
-    navers = NaverDetail(many=True, read_only=True)
+    navers = NaverDetail(many=True, read_only=True, required=False)
 
     class Meta:
         model = Project
