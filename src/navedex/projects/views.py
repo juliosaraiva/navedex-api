@@ -10,7 +10,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_serializer_class(self):
-        if self.action == 'create':
+        if self.action in ['create', 'partial_update', 'update']:
             return serializers.ProjectCreateSerializer
         if self.action == 'retrieve':
             return serializers.ProjectDetailSerializer

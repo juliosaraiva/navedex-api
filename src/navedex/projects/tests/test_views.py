@@ -155,3 +155,76 @@ class PrivateProjectsApiTest(TestCase):
         serializer = ProjectCreateSerializer(project)
 
         self.assertEqual(serializer.data, res.data)
+
+    def test_remove_project_successful(self):
+        """Test that the owner can remove a project successfully"""
+        p1 = sample_project(owner=self.owner)
+
+        url = detail_url(p1.id)
+        res = self.client.delete(url)
+
+        project = Project.objects.filter(id=p1.id).exists()
+
+        self.assertFalse(project)
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_partial_update_project(self):
+        """Test updating a project with a PATCH method"""
+        n1_dict = dict(
+            name="Naver 1",
+            birthdate="1990-11-22",
+            admission_date="2019-02-05",
+            job_role="Backend Developer"
+        )
+        n2_dict = dict(
+            name="Naver 2",
+            birthdate="1992-12-23",
+            admission_date="2011-10-27",
+            job_role="UX"
+        )
+        naver1 = Naver.objects.create(owner=self.owner, **n1_dict)
+        naver2 = Naver.objects.create(owner=self.owner, **n2_dict)
+
+        p1_dict = dict(name="New API")
+        project = sample_project(owner=self.owner, **p1_dict)
+        project.navers.add(naver1.id)
+
+        payload = {
+            "name": "New WebSite",
+            "navers": [naver2.id, naver1.id]
+        }
+
+        url = detail_url(project.id)
+        self.client.patch(url, payload)
+
+        project.refresh_from_db()
+
+        self.assertEqual(project.name, payload["name"])
+        navers = project.navers.all()
+        self.assertEqual(len(navers), 2)
+        self.assertIn(naver2, navers)
+
+    def test_full_update_project(self):
+        """Test updating a project with PUT method"""
+        project = sample_project(owner=self.owner)
+        naver_dict = dict(
+            name="New Naver",
+            birthdate="1980-12-31",
+            admission_date="2050-01-01",
+            job_role="UX"
+        )
+        naver = Naver.objects.create(owner=self.owner, **naver_dict)
+
+        payload = dict(
+            name="New Website Design",
+            navers=[naver.id]
+        )
+        url = detail_url(project.id)
+        self.client.put(url, payload)
+
+        project.refresh_from_db()
+
+        self.assertEqual(project.name, payload['name'])
+        navers = project.navers.all()
+        self.assertEqual(len(navers), 1)
+        self.assertIn(naver, navers)

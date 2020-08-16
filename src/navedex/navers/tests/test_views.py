@@ -192,20 +192,20 @@ class PrivateNaverAPITest(TestCase):
 
     def test_remove_naver_successful(self):
         """Test that the owner can remove a naver successfully"""
-        n1 = dict(
+        naver_dict = dict(
             name='Naver 1',
             birthdate='1992-02-02',
             admission_date='2020-09-11',
             job_role='Designer',
         )
-        naver = sample_naver(owner=self.owner, **n1)
+        n1 = sample_naver(owner=self.owner, **naver_dict)
 
-        url = detail_url(naver.id)
+        url = detail_url(n1.id)
         res = self.client.delete(url)
 
-        check = Naver.objects.filter(id=naver.id).exists()
+        naver = Naver.objects.filter(id=n1.id).exists()
 
-        self.assertFalse(check)
+        self.assertFalse(naver)
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_partial_update_naver(self):
@@ -233,3 +233,26 @@ class PrivateNaverAPITest(TestCase):
         projects = naver.projects.all()
         self.assertEqual(len(projects), 1)
         self.assertIn(project, projects)
+
+    def test_full_update_naver(self):
+        """Test updating a naver with PUT method"""
+        naver = sample_naver(owner=self.owner)
+        project = Project.objects.create(owner=self.owner, name="New Website")
+        naver.projects.add(project)
+
+        payload = dict(
+            name="Naver Updated",
+            birthdate="1980-12-31",
+            admission_date="2050-01-01",
+            job_role="UX"
+        )
+        url = detail_url(naver.id)
+        self.client.put(url, payload)
+
+        naver.refresh_from_db()
+        self.assertEqual(naver.name, payload["name"])
+        self.assertEqual(str(naver.birthdate), payload["birthdate"])
+        self.assertEqual(str(naver.admission_date), payload["admission_date"])
+        self.assertEqual(naver.job_role, payload["job_role"])
+        projects = naver.projects.all()
+        self.assertEqual(len(projects), 0)

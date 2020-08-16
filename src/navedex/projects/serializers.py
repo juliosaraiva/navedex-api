@@ -41,6 +41,3 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
         model = Project
         fields = ('id', 'name', 'navers')
         read_only_fields = ('id',)
-
-    def to_representation(self, instance):
-        return super().to_representation(instance)
