@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import datetime
 from pathlib import Path
 from decouple import config, Csv
+from dj_database_url import parse as dburl
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
@@ -42,6 +43,7 @@ DJANGO_APPS = [
 
 THIRD_PART_APPS = [
     'rest_framework',
+    'django_extensions',
 ]
 
 PROJECT_APPS = [
@@ -86,17 +88,11 @@ WSGI_APPLICATION = 'navedex.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': config('DB_ENGINE'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT'),
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD')
-    }
-}
+default_dburl = 'sqlite:///' / BASE_DIR / 'db.sqlite3'
 
+DATABASES = {
+    'default': config('DATABASE_URL', default=default_dburl, cast=dburl)
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
